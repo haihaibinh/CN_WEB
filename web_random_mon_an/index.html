@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hôm Nay Ăn Gì? - Random Món Ăn 2 Tầng Siêu Hấp Dẫn</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-orange-500 selection:text-white relative overflow-x-hidden">
+
+  <!-- Background Ambient Glows -->
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-orange-600/15 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="fixed bottom-10 right-1/4 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/20 text-xl font-bold">
+          🍜
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-orange-400 via-amber-300 to-rose-400 bg-clip-text text-transparent">
+            Hôm Nay Ăn Gì?
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">Giải pháp cứu cánh cho câu hỏi khó nhất thế giới</p>
+        </div>
+      </div>
+
+      <!-- Controls & Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Sound Toggle -->
+        <button id="soundToggleBtn" title="Bật/Tắt âm thanh" class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition">
+          <i data-lucide="volume-2" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Mode Toggle (Wheel / Slot) -->
+        <div class="bg-slate-900 p-1 rounded-xl border border-slate-800 flex items-center gap-1">
+          <button id="modeWheelBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition bg-orange-500 text-white shadow-sm">
+            <i data-lucide="disc-3" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Vòng Quay</span>
+          </button>
+          <button id="modeSlotBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-400 hover:text-white transition">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Máy Xèng</span>
+          </button>
+        </div>
+
+        <!-- Custom Food Data Modal Button -->
+        <button id="openManageBtn" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition">
+          <i data-lucide="settings-2" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Quản Lý Món</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 flex flex-col">
+    
+    <!-- Top Filter Bar: Meal Time & Budget -->
+    <section class="mb-6 p-4 rounded-2xl glass-panel flex flex-wrap items-center justify-between gap-4 border border-slate-800 shadow-xl">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-orange-400"></i> Bữa ăn:
+        </span>
+        <button data-meal="all" class="meal-filter-btn px-3 py-1 rounded-full text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/40">Tất cả</button>
+        <button data-meal="sang" class="meal-filter-btn px-3 py-1 rounded-full text-xs font-medium bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white">Sáng</button>
+        <button data-meal="trua" class="meal-filter-btn px-3 py-1 rounded-full text-xs font-medium bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white">Trưa</button>
+        <button data-meal="toi" class="meal-filter-btn px-3 py-1 rounded-full text-xs font-medium bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white">Tối</button>
+        <button data-meal="an_vat" class="meal-filter-btn px-3 py-1 rounded-full text-xs font-medium bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white">Ăn vặt / Nhậu</button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1">
+          <i data-lucide="wallet" class="w-3.5 h-3.5 text-emerald-400"></i> Ngân sách:
+        </span>
+        <button data-budget="all" class="budget-filter-btn px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">Bất kỳ</button>
+        <button data-budget="binh_dan" class="budget-filter-btn px-3 py-1 rounded-full text-xs font-medium bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white">Bình dân ($)</button>
+        <button data-budget="tam_trung" class="budget-filter-btn px-3 py-1 rounded-full text-xs font-medium bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white">Tầm trung ($$)</button>
+        <button data-budget="sang_chanh" class="budget-filter-btn px-3 py-1 rounded-full text-xs font-medium bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white">Sang chảnh ($$$)</button>
+      </div>
+    </section>
+
+    <!-- Step Progress Indicator -->
+    <div class="max-w-md mx-auto w-full mb-6">
+      <div class="flex items-center justify-between relative">
+        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 -z-0"></div>
+        <div id="stepLineProgress" class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-500 w-0 -z-0"></div>
+        
+        <!-- Step 1 Node -->
+        <div id="stepNode1" class="relative z-10 flex flex-col items-center">
+          <div class="w-10 h-10 rounded-full bg-orange-500 text-white font-bold flex items-center justify-center shadow-lg shadow-orange-500/40 border-4 border-slate-950 transition-all">
+            1
+          </div>
+          <span class="text-xs font-semibold mt-1.5 text-orange-400">Chọn Thể Loại</span>
+        </div>
+
+        <!-- Step 2 Node -->
+        <div id="stepNode2" class="relative z-10 flex flex-col items-center">
+          <div class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center border-4 border-slate-950 transition-all">
+            2
+          </div>
+          <span class="text-xs font-semibold mt-1.5 text-slate-500">Chọn Chi Tiết</span>
+        </div>
+
+        <!-- Step 3 Node -->
+        <div id="stepNode3" class="relative z-10 flex flex-col items-center">
+          <div class="w-10 h-10 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center border-4 border-slate-950 transition-all">
+            🎉
+          </div>
+          <span class="text-xs font-semibold mt-1.5 text-slate-500">Thưởng Thức</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Stage Banner -->
+    <div id="stageBanner" class="text-center mb-6">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+        Tầng 1: Chọn Thể Loại Món Ăn
+      </h2>
+      <p class="text-sm text-slate-400 mt-1 max-w-lg mx-auto">
+        (Cơm, Phở, Mỳ, Bún, Miến, Lẩu, Nướng, Đồ Chay...)
+      </p>
+    </div>
+
+    <!-- Randomizer Views (Wheel / Slot) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-8">
+      
+      <!-- Interactive Area (Canvas Wheel or Slot Machine) -->
+      <div class="lg:col-span-7 flex flex-col items-center justify-center p-6 rounded-3xl glass-panel relative border border-slate-800 shadow-2xl overflow-hidden min-h-[460px]">
+        
+        <!-- View 1: Lucky Wheel Mode -->
+        <div id="wheelModeView" class="w-full flex flex-col items-center">
+          <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <canvas id="wheelCanvas" width="440" height="440" class="w-full h-full rounded-full cursor-pointer filter drop-shadow-2xl"></canvas>
+            
+            <!-- Wheel Center Hub -->
+            <button id="centerSpinBtn" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 text-white font-black text-sm flex flex-col items-center justify-center shadow-xl border-4 border-slate-950 hover:scale-105 active:scale-95 transition-transform z-20">
+              <i data-lucide="rotate-cw" class="w-5 h-5 mb-0.5"></i>
+              QUAY
+            </button>
+          </div>
+        </div>
+
+        <!-- View 2: Slot Machine Mode (Hidden by default) -->
+        <div id="slotModeView" class="w-full flex flex-col items-center hidden py-8">
+          <div class="w-full max-w-sm rounded-2xl bg-slate-900 border-4 border-amber-500/50 p-6 shadow-2xl relative">
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-0.5 bg-amber-500 text-slate-950 font-black text-xs rounded-full uppercase tracking-wider">
+              Lucky Food Box
+            </div>
+
+            <!-- Reel Window -->
+            <div class="slot-machine-reel rounded-xl bg-slate-950 border border-slate-800 shadow-inner flex items-center justify-center relative">
+              <div id="slotTrack" class="slot-item text-center">
+                <span class="text-6xl mb-2">🍜</span>
+                <span class="text-2xl font-bold text-white">Đang chờ quay...</span>
+              </div>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+              <button id="slotSpinBtn" class="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-base tracking-wide shadow-lg shadow-orange-500/30 hover:brightness-110 active:scale-98 transition flex items-center justify-center gap-2">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                KÉO CẦN RANDOM
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wheel Action Controls Below -->
+        <div id="wheelActionControls" class="mt-6 flex items-center gap-3">
+          <button id="spinBtn" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-base shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 active:scale-95 transition flex items-center gap-2">
+            <i data-lucide="play" class="w-5 h-5 fill-white"></i>
+            QUAY NGAY!
+          </button>
+          <button id="resetFlowBtn" class="px-4 py-3.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white font-semibold text-sm transition flex items-center gap-1.5" title="Bắt đầu lại từ Tầng 1">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            Quay Lại Tầng 1
+          </button>
+        </div>
+      </div>
+
+      <!-- Result Showcase & Information Panel -->
+      <div class="lg:col-span-5 flex flex-col gap-6">
+        
+        <!-- Status Card / Current Selection -->
+        <div id="stageStatusCard" class="p-6 rounded-3xl glass-panel border border-slate-800 shadow-xl">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="compass" class="w-4 h-4 text-orange-400"></i> Trạng Thái Hiện Tại
+            </span>
+            <span id="badgeCategory" class="px-3 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400">
+              Chưa chọn thể loại
+            </span>
+          </div>
+
+          <!-- Pending State Placeholder -->
+          <div id="placeholderResult" class="py-12 flex flex-col items-center justify-center text-center">
+            <div class="w-20 h-20 rounded-full bg-slate-900/80 border border-slate-800 flex items-center justify-center text-4xl mb-4 animate-bounce">
+              🎯
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1">Bạn chưa biết ăn gì?</h3>
+            <p class="text-xs text-slate-400 max-w-xs">
+              Nhấn nút <b>"QUAY NGAY"</b> để hệ thống chọn ngẫu nhiên thể loại cho bạn nhé!
+            </p>
+          </div>
+
+          <!-- Winning Stage 1 Result (Category Chosen) -->
+          <div id="categoryResultCard" class="hidden animate-pop">
+            <div class="relative rounded-2xl overflow-hidden mb-4 h-44 shadow-md group">
+              <img id="categoryImg" src="" alt="Category" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+              <div class="absolute bottom-3 left-4 right-4">
+                <span class="text-xs font-bold text-orange-400 uppercase tracking-widest">ĐÃ CHỌN THỂ LOẠI</span>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span id="categoryEmoji" class="text-2xl">🍜</span>
+                  <h3 id="categoryTitle" class="text-2xl font-extrabold text-white">Phở</h3>
+                </div>
+              </div>
+            </div>
+
+            <p id="categoryDesc" class="text-xs text-slate-300 leading-relaxed mb-4"></p>
+
+            <div class="bg-orange-500/10 border border-orange-500/20 rounded-xl p-3 mb-4 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-lg">
+                2
+              </div>
+              <p class="text-xs text-orange-200">
+                Bây giờ hãy quay tiếp để chọn <b>món cụ thể</b> trong thể loại này!
+              </p>
+            </div>
+
+            <button id="triggerStep2Btn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white font-extrabold text-sm tracking-wide shadow-lg shadow-orange-500/30 transition flex items-center justify-center gap-2">
+              <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+              QUAY TIẾP TẦNG 2!
+            </button>
+          </div>
+
+          <!-- Winning Final Result (Dish Chosen) -->
+          <div id="finalResultCard" class="hidden animate-pop">
+            <div class="relative rounded-2xl overflow-hidden mb-4 h-52 shadow-xl group">
+              <img id="finalDishImg" src="" alt="Món ăn" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
+              <div class="absolute top-3 right-3 bg-red-600/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                <i data-lucide="award" class="w-3.5 h-3.5"></i> Món Hôm Nay
+              </div>
+              <div class="absolute bottom-3 left-4 right-4">
+                <span id="finalDishCategoryBadge" class="text-xs font-bold text-amber-400 uppercase tracking-widest">PHỞ NÓNG HỔI</span>
+                <h3 id="finalDishName" class="text-2xl font-black text-white drop-shadow-md">Phở Bò Tái Nạm Gầu</h3>
+              </div>
+            </div>
+
+            <p id="finalDishDesc" class="text-sm text-slate-300 leading-relaxed mb-4"></p>
+
+            <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
+              <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
+                <i data-lucide="flame" class="w-4 h-4 text-rose-500"></i>
+                <div>
+                  <span class="text-slate-400 block text-[10px]">Ước tính calo</span>
+                  <span id="finalDishCalories" class="font-bold text-slate-200">~550 kcal</span>
+                </div>
+              </div>
+              <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
+                <i data-lucide="utensils" class="w-4 h-4 text-amber-400"></i>
+                <div>
+                  <span class="text-slate-400 block text-[10px]">Phù hợp bữa</span>
+                  <span id="finalDishMeal" class="font-bold text-slate-200">Sáng, Trưa, Tối</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action buttons: Google Maps & Spin Again -->
+            <div class="flex flex-col gap-2">
+              <a id="findNearbyBtn" href="#" target="_blank" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm text-center shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                Tìm Quán Này Gần Đây Trên Google Maps
+              </a>
+              <button id="spinAgainBtn" class="w-full py-3 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white font-semibold text-xs transition flex items-center justify-center gap-1.5">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                Không ưng? Chọn món khác trong nhóm này!
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- History of Decisions -->
+        <div class="p-5 rounded-3xl glass-panel border border-slate-800 shadow-xl">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="history" class="w-4 h-4 text-amber-400"></i> Lịch Sử Đã Random
+            </span>
+            <button id="clearHistoryBtn" class="text-[11px] text-slate-500 hover:text-rose-400 transition">Xóa lịch sử</button>
+          </div>
+          <div id="historyList" class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+            <div class="text-center py-4 text-xs text-slate-500">Chưa có món nào được chọn</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Quản lý danh mục & món ăn -->
+  <div id="manageModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
+        <div class="flex items-center gap-2">
+          <i data-lucide="utensils-crossed" class="w-5 h-5 text-orange-400"></i>
+          <h3 class="text-base font-bold text-white">Quản Lý Danh Sách Món Ăn</h3>
+        </div>
+        <button id="closeManageBtn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto flex-1 flex flex-col gap-6">
+        <!-- Add New Dish Form -->
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Thêm Món Ăn Mới
+          </h4>
+          <form id="addDishForm" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Thuộc Thể Loại</label>
+              <select id="newDishCategory" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+                <!-- Dynamically filled -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Tên Món Ăn</label>
+              <input id="newDishName" type="text" required placeholder="vd: Phở Bò Khô Gia Truyền" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs text-slate-400 mb-1">Mô Tả Ngắn</label>
+              <input id="newDishDesc" type="text" placeholder="vd: Nước sốt sánh mịn đậm đà, đậu phộng bùi..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Link Ảnh (URL)</label>
+              <input id="newDishImage" type="url" placeholder="https://..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Ước Lượng Calo</label>
+              <input id="newDishCalories" type="text" placeholder="vd: ~500 kcal" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500">
+            </div>
+            <div class="sm:col-span-2 flex justify-end">
+              <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
+                <i data-lucide="plus" class="w-4 h-4"></i> Thêm Món Vào Kho
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Food List Overview by Category -->
+        <div>
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Danh Sách Món Hiện Có</h4>
+          <div id="categoryManageList" class="flex flex-col gap-3">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between">
+        <button id="resetDefaultDataBtn" class="text-xs text-rose-400 hover:underline flex items-center gap-1">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Khôi phục dữ liệu gốc
+        </button>
+        <button id="closeManageBottomBtn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold transition">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-500">
+    <p>💡 Hôm Nay Ăn Gì? - Ứng dụng gợi ý ẩm thực thông minh & ngẫu nhiên</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
