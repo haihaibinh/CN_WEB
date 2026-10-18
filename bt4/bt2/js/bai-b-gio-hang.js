@@ -19,43 +19,112 @@ class GioHang {
 
 	// 1. Thêm sản phẩm; trả về true nếu thêm được, false nếu soLuong không hợp lệ.
 	them(sanPham, soLuong) {
-		// TODO
+		if (typeof soLuong !== "number" || !Number.isInteger(soLuong) || soLuong <= 0) {
+			return false;
+		}
+
+		const dong = this.dsDong.find(d => d.id === sanPham.id);
+		if (dong) {
+			dong.soLuong += soLuong;
+		} else {
+			this.dsDong.push({
+				id: sanPham.id,
+				ten: sanPham.ten,
+				loai: sanPham.loai,
+				gia: sanPham.gia,
+				soLuong: soLuong
+			});
+		}
+		return true;
 	}
 
 	// 2. Xoá dòng có id tương ứng; trả về true nếu có xoá, false nếu không tìm thấy.
 	xoa(id) {
-		// TODO
+		const index = this.dsDong.findIndex(d => d.id === id);
+		if (index !== -1) {
+			this.dsDong.splice(index, 1);
+			return true;
+		}
+		return false;
 	}
 
 	// 3. Tổng tiền cả giỏ.
 	tongTien() {
-		// TODO
+		return this.dsDong.reduce((tong, d) => tong + d.gia * d.soLuong, 0);
 	}
 
 	// 4. Object thống kê: { "<loai>": tổng tiền của loại đó, ... }.
 	thongKeTheoLoai() {
-		// TODO
+		const ketQua = {};
+		for (const d of this.dsDong) {
+			ketQua[d.loai] = (ketQua[d.loai] || 0) + d.gia * d.soLuong;
+		}
+		return ketQua;
 	}
 
 	// 5. Dòng có thành tiền lớn nhất (bản sao, có thêm thanhTien); null nếu giỏ rỗng.
 	dongDatNhat() {
-		// TODO
+		if (this.dsDong.length === 0) {
+			return null;
+		}
+		let maxDong = this.dsDong[0];
+		let maxTien = maxDong.gia * maxDong.soLuong;
+		for (let i = 1; i < this.dsDong.length; i++) {
+			const tien = this.dsDong[i].gia * this.dsDong[i].soLuong;
+			if (tien > maxTien) {
+				maxTien = tien;
+				maxDong = this.dsDong[i];
+			}
+		}
+		return {
+			id: maxDong.id,
+			ten: maxDong.ten,
+			loai: maxDong.loai,
+			gia: maxDong.gia,
+			soLuong: maxDong.soLuong,
+			thanhTien: maxTien
+		};
 	}
 
 	// 6. Mảng BẢN SAO các dòng, mỗi dòng có thêm thuộc tính thanhTien.
 	layDanhSach() {
-		// TODO
+		return this.dsDong.map(d => ({
+			id: d.id,
+			ten: d.ten,
+			loai: d.loai,
+			gia: d.gia,
+			soLuong: d.soLuong,
+			thanhTien: d.gia * d.soLuong
+		}));
 	}
 
 	// 7. Chuỗi JSON của mảng các dòng.
 	xuatJSON() {
-		// TODO
+		const mang = this.dsDong.map(d => ({
+			id: d.id,
+			ten: d.ten,
+			loai: d.loai,
+			gia: d.gia,
+			soLuong: d.soLuong
+		}));
+		return JSON.stringify(mang);
 	}
 }
 
 // 8. Tạo lại một GioHang từ chuỗi JSON do xuatJSON() sinh ra.
 function napGioHang(chuoiJSON) {
-	// TODO
+	const g = new GioHang();
+	const mang = JSON.parse(chuoiJSON);
+	if (Array.isArray(mang)) {
+		g.dsDong = mang.map(d => ({
+			id: d.id,
+			ten: d.ten,
+			loai: d.loai,
+			gia: d.gia,
+			soLuong: d.soLuong
+		}));
+	}
+	return g;
 }
 
 // ---------- CHẠY THỬ (không sửa) ----------

@@ -14,81 +14,81 @@ const duLieuTho = '[' +
 	']';
 
 // ---------- Phần 1: JSON → mảng object ----------
-const dsBai = JSON.___(1)___(duLieuTho);
+const dsBai = JSON.parse(duLieuTho);
 
 // ---------- Phần 2: Thêm / bớt phần tử ----------
 // Thêm vào CUỐI mảng:
-dsBai.___(2)___({ id: 6, title: "Tuyển thực tập sinh", date: "10-05-2012", views: 45, tags: ["tuyen dung"], draft: true });
+dsBai.push({ id: 6, title: "Tuyển thực tập sinh", date: "10-05-2012", views: 45, tags: ["tuyen dung"], draft: true });
 // Thêm vào ĐẦU mảng:
-dsBai.___(3)___({ id: 0, title: "Thông báo nghỉ lễ", date: "30-04-2012", views: 120, tags: ["thong bao"], draft: false });
+dsBai.unshift({ id: 0, title: "Thông báo nghỉ lễ", date: "30-04-2012", views: 120, tags: ["thong bao"], draft: false });
 // Lấy ra và xoá phần tử CUỐI:
-const baiCuoi = dsBai.___(4)___();
-console.log(baiCuoi.id);             // in ra: ___(5)___
+const baiCuoi = dsBai.pop();
+console.log(baiCuoi.id);             // in ra: 6
 // Lấy ra và xoá phần tử ĐẦU:
-const baiDau = dsBai.___(6)___();
-console.log(dsBai.length);           // in ra: ___(7)___
+const baiDau = dsBai.shift();
+console.log(dsBai.length);           // in ra: 5
 
 // ---------- Phần 3: Thuộc tính của object ----------
 const baiMot = dsBai[0];
 baiMot.noiBat = true;                          // thêm thuộc tính
-baiMot___(8)___ = "Ban biên tập";              // thêm thuộc tính có khoá là  tac gia  (có dấu cách)
-___(9)___ baiMot.noiBat;                       // xoá thuộc tính noiBat
-console.log(baiMot.noiBat);          // in ra: ___(10)___
+baiMot["tac gia"] = "Ban biên tập";              // thêm thuộc tính có khoá là  tac gia  (có dấu cách)
+delete baiMot.noiBat;                       // xoá thuộc tính noiBat
+console.log(baiMot.noiBat);          // in ra: undefined
 
 // ---------- Phần 4: Kiểu tham chiếu ----------
 const baiGhim = dsBai[1];
 baiGhim.title = "[GHIM] " + baiGhim.title;
-console.log(dsBai[1].title);         // in ra: ___(11)___
+console.log(dsBai[1].title);         // in ra: [GHIM] Mẫu thiệp cưới mùa thu
 
 // ---------- Phần 5: filter / map / reduce ----------
 // Chỉ giữ các bài ĐÃ ĐĂNG (draft là false):
-const daDang = dsBai.___(12)___(bai => bai.draft === false);
-console.log(daDang.length);          // in ra: ___(13)___
+const daDang = dsBai.filter(bai => bai.draft === false);
+console.log(daDang.length);          // in ra: 4
 
 // Mảng mới gồm tiêu đề viết HOA:
-const dsTieuDe = daDang.___(14)___(bai => bai.title.___(15)___());
+const dsTieuDe = daDang.map(bai => bai.title.toUpperCase());
 
 // Tổng lượt xem:
-const tongLuotXem = daDang.reduce((tong, bai) => tong + ___(16)___, ___(17)___);
-console.log(tongLuotXem);            // in ra: ___(18)___
+const tongLuotXem = daDang.reduce((tong, bai) => tong + bai.views, 0);
+console.log(tongLuotXem);            // in ra: 2600
 // Nếu BỎ đối số thứ hai (17) của reduce thì tongLuotXem là:
 //   (A) vẫn là con số đúng   (B) một chuỗi bắt đầu bằng "[object Object]"   (C) báo TypeError
-//   → ___(19)___
+//   → (B)
 
 // Bài nhiều lượt xem nhất; nếu bằng nhau thì giữ bài ĐỨNG TRƯỚC trong mảng:
-const baiHot = daDang.reduce((max, bai) => bai.views ___(20)___ max.views ? bai : max);
-console.log(baiHot.id);              // in ra: ___(21)___
+const baiHot = daDang.reduce((max, bai) => bai.views > max.views ? bai : max);
+console.log(baiHot.id);              // in ra: 2
 
 // Callback của map KHÔNG return:
 const thu = daDang.map(bai => { bai.views + 1; });
-console.log(thu[0]);                 // in ra: ___(22)___
+console.log(thu[0]);                 // in ra: undefined
 
 // ---------- Phần 6: Đếm số bài theo thẻ (tag) ----------
 const demThe = {};
 daDang.forEach(bai => {
-	for (const the ___(23)___ bai.tags) {
-		demThe[the] = (demThe[___(24)___] || 0) + 1;
+	for (const the of bai.tags) {
+		demThe[the] = (demThe[the] || 0) + 1;
 	}
 });
-console.log(demThe["mau moi"]);      // in ra: ___(25)___
+console.log(demThe["mau moi"]);      // in ra: 2
 
 // ---------- Phần 7: Class ----------
 class BaiViet {
-	___(26)___(duLieu) {
+	constructor(duLieu) {
 		this.title = duLieu.title;
 		this.date = duLieu.date;
-		___(27)___.views = duLieu.views;
+		this.views = duLieu.views;
 	}
 	tomTat() {
 		return `${this.date} — ${this.views} lượt xem`;
 	}
 }
-const dsBaiViet = daDang.map(duLieu => ___(28)___ BaiViet(duLieu));
+const dsBaiViet = daDang.map(duLieu => new BaiViet(duLieu));
 
 // ---------- Phần 8: Object → JSON ----------
-const guiDi = JSON.___(29)___(dsBaiViet[0]);
+const guiDi = JSON.stringify(dsBaiViet[0]);
 console.log(guiDi);
-// Chuỗi guiDi có chứa phương thức tomTat không? (có / không)  → ___(30)___
+// Chuỗi guiDi có chứa phương thức tomTat không? (có / không)  → không
 
 // ---------- Hiển thị ----------
 veDanhSachTin(dsBaiViet);
